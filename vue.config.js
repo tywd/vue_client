@@ -1,4 +1,5 @@
 const IS_PROD = ["production", "prod"].includes(process.env.NODE_ENV);
+const IS_DEV = ["development"].includes(process.env.NODE_ENV);
 const hostname = 'https://api.ibrolive.cn'
 const hostname_test = 'https://apit.ibrolive.cn'
 
