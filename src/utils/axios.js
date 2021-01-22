@@ -3,17 +3,26 @@
  */
 import axios from 'axios'
 import { Toast } from 'vant'
-import { getQueryString } from './plugins'
+import { getQueryString,urlParams } from './plugins'
 // import qs from 'qs' // 引入qs模块，用来序列化post类型的数据，某些请求会用得到
 // 创建axios实例
 let httpAxios = axios.create({
-  baseURL: process.env.VUE_APP_BASE_URL,
+  // baseURL: process.env.VUE_APP_BASE_URL,
   timeout: 10000, // 请求时间
   responseType: 'json', // 默认的 // 表示服务器响应的数据类型
   headers:{
     'Content-Type': 'application/json charset=utf-8'
   }
 })
+
+// 环境切换
+if (process.env.NODE_ENV === 'development') {
+  // 开发环境下的代理地址，解决本地跨域，配置在config目录下的index.js dev.proxyConfig中
+  httpAxios.defaults.baseURL = process.env.VUE_APP_BASE_URL
+} else if (process.env.NODE_ENV === 'production') {
+  // 生产环境
+  httpAxios.defaults.baseURL = process.env.VUE_APP_BASE_URL
+}
 // post请求提交的是json格式的数据，则content-type如下
 // httpAxios.defaults.headers.post['Content-Type'] = 'application/json charset=utf-8'
 // 如果要将content-type改为如下，则需在post的时候，将post的数据data 进行序列化 ：qs.stringify(data)
@@ -52,48 +61,15 @@ httpAxios.interceptors.response.use(res => {
 }, error => {
   // 对响应错误时
   if (error && error.res) {
-    switch (error.res.status) {
+    switch (error.res.rtn) {
       case 400:
-        error.message = '错误请求'
+        if (error.response && error.response.data && error.response.data.msg) {
+          console.log('400错误=', error.response.data.msg)
+          // redirect( '/error?status=408&'+urlParams(route, false))
+          redirect( '/error?status=400')
+        }
         break
-      case 401:
-        error.message = '未授权，请重新登录'
-        // 跳转到登录页面
-        setTimeout(() => {
-          redirect('/login')
-        }, 1000);
-        break
-      case 403:
-        // 403 token过期
-        error.message = '拒绝访问'
-        break
-      case 404:
-        error.message = '请求错误，未找到该资源！'
-        break
-      case 405:
-        error.message = '请求方法未允许'
-        break
-      case 408:
-        error.message = '请求超时'
-        break
-      case 500:
-        error.message = '服务器端出错'
-        break
-      case 501:
-        error.message = '网络未实现'
-        break
-      case 502:
-        error.message = '网络错误'
-        break
-      case 503:
-        error.message = '服务不可用'
-        break
-      case 504:
-        error.message = '网络超时'
-        break
-      case 505:
-        error.message = 'http版本不支持该请求'
-        break
+      
       default:
         error.message = `未知错误${error.res.status}`
     }
