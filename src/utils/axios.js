@@ -2,9 +2,12 @@
  * 配置拦截器 和 全局地址 token
  */
 import axios from 'axios'
+import { Toast } from 'vant'
+import { getQueryString } from './plugins'
 // import qs from 'qs' // 引入qs模块，用来序列化post类型的数据，某些请求会用得到
 // 创建axios实例
 let httpAxios = axios.create({
+  baseURL: process.env.VUE_APP_BASE_URL,
   timeout: 10000, // 请求时间
   responseType: 'json', // 默认的 // 表示服务器响应的数据类型
   headers:{
@@ -12,7 +15,7 @@ let httpAxios = axios.create({
   }
 })
 // post请求提交的是json格式的数据，则content-type如下
-httpAxios.defaults.headers.post['Content-Type'] = 'application/json charset=utf-8'
+// httpAxios.defaults.headers.post['Content-Type'] = 'application/json charset=utf-8'
 // 如果要将content-type改为如下，则需在post的时候，将post的数据data 进行序列化 ：qs.stringify(data)
 // httpAxios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded' // 默认值
 
@@ -24,9 +27,9 @@ httpAxios.interceptors.request.use(config => {
   // 发送请求前做些什么
   // 根据条件加入token-安全携带
   // eslint-disable-next-line no-constant-condition
-  if (localStorage.getItem('token')) { // 需自定义 // 判断是否存在token，如果存在的话，则每个http header都加上token
+  if (getQueryString('token')) { // 需自定义 // 判断是否存在token，如果存在的话，则每个http header都加上token
     // 让每个请求携带token
-    config.headers.Authorization = 'Bearer' + localStorage.getItem('token')
+    config.headers.Authorization = getQueryString('token')
   }
   return config
 }, error => {
@@ -37,28 +40,27 @@ httpAxios.interceptors.request.use(config => {
 /**
  * 设置拦截器 response响应拦截
  */
-httpAxios.interceptors.response.use(response => {
-  console.info(response)
+httpAxios.interceptors.response.use(res => {
+  console.info(res)
   // 如果返回的状态码为200，说明接口请求成功，可以正常拿到数据
   // 否则的话抛出错误
-  if (response.status === 200) {
-    return Promise.resolve(response.data);
+  if (res.status === 200) {
+    return Promise.resolve(res.data);
   } else {
-    return Promise.reject(response);
+    return Promise.reject(res);
   }
 }, error => {
   // 对响应错误时
-  if (error && error.response) {
-    switch (error.response.status) {
+  if (error && error.res) {
+    switch (error.res.status) {
       case 400:
         error.message = '错误请求'
         break
       case 401:
         error.message = '未授权，请重新登录'
-        // 清除token信息并跳转到登录页面
-        localStorage.removeItem('Authorization')
+        // 跳转到登录页面
         setTimeout(() => {
-          this.$router.push('/login')
+          redirect('/login')
         }, 1000);
         break
       case 403:
@@ -93,7 +95,7 @@ httpAxios.interceptors.response.use(response => {
         error.message = 'http版本不支持该请求'
         break
       default:
-        error.message = `未知错误${error.response.status}`
+        error.message = `未知错误${error.res.status}`
     }
   } else {
     error.message = '连接到服务器失败'
