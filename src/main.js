@@ -7,7 +7,7 @@ import Vant from 'vant'
 import 'vant/lib/index.css'
 
 Vue.config.productionTip = false;
-Vue.prototype.$axios = axios // axios请求放入全局
+Vue.prototype.$axios = axios // 全局引入axios请求
 Vue.use(Vant)
 
 new Vue({

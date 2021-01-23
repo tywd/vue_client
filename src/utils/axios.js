@@ -7,7 +7,6 @@ import { getQueryString,urlParams } from './plugins'
 // import qs from 'qs' // 引入qs模块，用来序列化post类型的数据，某些请求会用得到
 // 创建axios实例
 let httpAxios = axios.create({
-  // baseURL: process.env.VUE_APP_BASE_URL,
   timeout: 10000, // 请求时间
   responseType: 'json', // 默认的 // 表示服务器响应的数据类型
   headers:{
@@ -18,11 +17,8 @@ let httpAxios = axios.create({
 // 环境切换
 if (process.env.NODE_ENV === 'development') {
   // 开发环境下的代理地址，解决本地跨域，配置在config目录下的index.js dev.proxyConfig中
-  // httpAxios.defaults.baseURL = process.env.VUE_APP_BASE_URL
-  httpAxios.defaults.baseURL = '/api/'
-} else if (process.env.NODE_ENV === 'production') {
-  // 生产环境
-  httpAxios.defaults.baseURL = process.env.VUE_APP_BASE_URL
+  console.log('development：', process.env);
+  httpAxios.defaults.baseURL = '/apit/'
 }
 // post请求提交的是json格式的数据，则content-type如下
 // httpAxios.defaults.headers.post['Content-Type'] = 'application/json charset=utf-8'
@@ -35,7 +31,7 @@ if (process.env.NODE_ENV === 'development') {
  */
 httpAxios.interceptors.request.use(config => {
   console.log("config：", config)
-  console.log('process.env.VUE_APP_BASE_URL: ', process.env.VUE_APP_BASE_URL);
+  console.log('process.env：', process.env);
   // 发送请求前做些什么
   // 根据条件加入token-安全携带
   // eslint-disable-next-line no-constant-condition
