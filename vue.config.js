@@ -15,16 +15,16 @@ module.exports = {
   parallel: require("os").cpus().length > 1,
   pwa: {},
   devServer: {
+    open: true,
     proxy: {
-      '/api/': {
+      [process.env.VUE_APP_BASE_URL]: {
         // target: hostname, // api主机
-        // target: process.env.NODE_ENV === 'development' ? hostname_test : hostname, // api主机
-        target: hostname_test, // api主机
+        target: process.env.NODE_ENV === 'development' ? hostname_test : hostname, // api主机
         changeOrigin: true, // 开启代理，在本地创建一个虚拟服务端
         // ws: true, // 是否启用websockets
         secure: false, // 如果是https接口，需要配置这个参数
         pathRewrite: {
-          '^/api': ''
+          ['^/'+process.env.VUE_APP_BASE_URL]: ''
         }
       }
     },

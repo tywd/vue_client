@@ -18,7 +18,8 @@ let httpAxios = axios.create({
 // 环境切换
 if (process.env.NODE_ENV === 'development') {
   // 开发环境下的代理地址，解决本地跨域，配置在config目录下的index.js dev.proxyConfig中
-  httpAxios.defaults.baseURL = process.env.VUE_APP_BASE_URL
+  // httpAxios.defaults.baseURL = process.env.VUE_APP_BASE_URL
+  httpAxios.defaults.baseURL = '/api/'
 } else if (process.env.NODE_ENV === 'production') {
   // 生产环境
   httpAxios.defaults.baseURL = process.env.VUE_APP_BASE_URL
@@ -33,6 +34,8 @@ if (process.env.NODE_ENV === 'development') {
  * 设置拦截器 request请求拦截
  */
 httpAxios.interceptors.request.use(config => {
+  console.log("config：", config)
+  console.log('process.env.VUE_APP_BASE_URL: ', process.env.VUE_APP_BASE_URL);
   // 发送请求前做些什么
   // 根据条件加入token-安全携带
   // eslint-disable-next-line no-constant-condition
